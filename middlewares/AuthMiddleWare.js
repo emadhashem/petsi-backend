@@ -8,7 +8,8 @@ module.exports = function (req , res , next) {
     // if(blackToken) res.status(401).send('denied')
     try {
         const verf = jwt.verify(token , process.env.JWT_SECRET)
-        req.user = {verf , token}
+        
+        req.user = {_id :verf._id , token}
         next()
     } catch (ex) {
         res.status(400).send('not valid token' + `${ex.message}`)
