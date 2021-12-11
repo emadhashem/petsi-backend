@@ -33,7 +33,7 @@ function validatePost(newPost) {
         adoptionRequests : Joi.array(),
         adopted : Joi.number(),
         petType : Joi.string(),
-        owner : Joi.string().required()
+        owner : Joi.string()
     })
     return postObj.validate(newPost)
 }

@@ -42,7 +42,11 @@ const userSchema = new mongoose.Schema({
     userImg : {
         type : String
     },
-    posts : [String]
+    posts : [String],
+    cartOfAdoption : {
+        type : [String],
+        default : []
+    }
 })
 
 
