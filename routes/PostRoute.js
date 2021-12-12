@@ -104,7 +104,6 @@ router.put('/update/addadoptrequest', authMiddleware, async (req, res) => {
             { "$push": { "adoptionRequests": ownerOfRequst } },
             { "new": true, "upsert": true },
         )
-        console.log(updatePostRequests)
         if (!updatePostRequests.modifiedCount) {
             return res.status(400).send('requst not added :(')
         }
@@ -120,5 +119,59 @@ router.put('/update/addadoptrequest', authMiddleware, async (req, res) => {
         return res.status(400).send(`${ex.message}`)
     }
 
+})
+
+
+router.put('/update/deleteadoptrequest', authMiddleware, async (req, res) => {
+    const { postId } = req.body
+    if (!postId) return res.status(400).send('postid not found')
+    try {
+        const ownerOfRequst = req.user._id
+        const checkIfUserAddReq = await Post.findOne({_id : postId})
+        if(checkIfUserAddReq) {
+            const postreqs = checkIfUserAddReq._doc.adoptionRequests
+            let cur = [...postreqs]
+            let fg = false
+            cur.forEach(item => {
+                if(item == ownerOfRequst) {
+                    fg = 1
+                    return
+                }
+            })
+            if(!fg) return res.status(400).send('the request not founded')
+        }
+        const updatePostRequests = await Post.updateOne({ _id: postId },
+            { "$pull": { "adoptionRequests": ownerOfRequst } },
+            { "new": true, "upsert": true },
+        )
+        if (!updatePostRequests.modifiedCount) {
+            return res.status(400).send('requst not deleted :(')
+        }
+        const addThePostToCartOfuser = await User.updateOne({ _id: ownerOfRequst },
+            { "$pull": { "cartOfAdoption": postId } },
+            { "new": true, "upsert": true },
+        )
+        if (!addThePostToCartOfuser.modifiedCount) {
+            return res.status(400).send('requst not delteed from cart :(')
+        }
+        return res.send('post deleted successfully')
+    } catch (ex) {
+        return res.status(400).send(`${ex.message}`)
+    }
+
+})
+router.put("/update/adopte", authMiddleware, async (req , res) => {
+    const {adopted, postId} = req.body
+    if(!adopted || !postId) return res.status(400).send('adopt state not found :(')
+
+    try {
+        const changeState = await Post.updateOne({_id : postId}, {adopted})
+        if(!changeState.modifiedCount) {
+            return res.status(400).send('adoption state didnot updated:(')
+        }
+        return res.send('state updated')
+    } catch (ex) {
+        return res.status(400).send(`${ex.message}`)
+    }
 })
 module.exports = router
