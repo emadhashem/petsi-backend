@@ -1,5 +1,6 @@
 const router = require('express').Router()
 const { validatePost, Post } = require('../models/PostModel')
+const {validatePost : ValidatePostAdmin, Post : PostAdmin} = require('../models/adminModel')
 const { User } = require('../models/userModel')
 const authMiddleware = require('../middlewares/AuthMiddleWare')
 router.post('/add', authMiddleware, async (req, res) => {
@@ -11,18 +12,39 @@ router.post('/add', authMiddleware, async (req, res) => {
             return res.status(400).send(` ${error.message}`)
         }
         const owner = req.user._id
-        const newPost = new Post({...postObj, owner})
-        const save = await newPost.save()
-        
-        const addPostID = await User.updateOne({ _id: owner },
-            { "$push": { "posts": save._doc._id } },
-            { "new": true, "upsert": true },
-        )
-        if (!addPostID.modifiedCount) {
-            return res.status(400).send(`not added to the user posts`)
-        }
+        const newpost = {...postObj, owner}
+        const saveNewPostAmin = await (new PostAdmin(newpost)).save()
+        return saveNewPostAmin._doc
+    } catch (ex) {
+        return res.status(400).send(`some thing wrong ${ex.message}`)
+    }
+})
 
-        return res.send(save._doc)
+router.put("/update/text" ,authMiddleware, async (req, res) => {
+
+    const {newText, post} = req.body
+
+    if(!newText || !post) {
+        return res.status(400).send(`new text or post not sended`)
+
+    }
+    try {
+        const addToAdminForUpdate = await (new PostAdmin({...post, text : newText})).save()
+        return res.send(addToAdminForUpdate._doc)
+    } catch (ex) {
+        return res.status(400).send(`some thing wrong ${ex.message}`)
+    }
+})
+router.put("/update/petimg" ,authMiddleware, async (req, res) => {
+
+    const {petImg, post} = req.body
+
+    if(!petImg || !post) {
+        return res.status(400).send(`new petimg or post not sended`)
+    }
+    try {
+        const addToAdminForUpdate = await (new PostAdmin({...post, petImg})).save()
+        return res.send(addToAdminForUpdate._doc)
     } catch (ex) {
         return res.status(400).send(`some thing wrong ${ex.message}`)
     }
@@ -49,37 +71,7 @@ router.delete('/delete', authMiddleware, async (req, res) => {
     }
 })
 
-router.put('/update/text', authMiddleware, async (req, res) => {
-    const { newText, postId } = req.body
-    if (!newText || !postId) return res.status(400).send('New Text not found')
-    try {
-        const UpdateTheText = await Post.updateOne({ _id: postId }, {
-            text: newText
-        })
-        if (!UpdateTheText.modifiedCount) {
-            return res.status(400).send('post not updated :(')
-        }
-        return res.send('post\'s text updated successfully')
-    } catch (ex) {
-        return res.status(400).send(`${ex.message}`)
-    }
-})
 
-router.put('/update/petimg', authMiddleware, async (req, res) => {
-    const { newimg, postId } = req.body
-    if (!newimg || !postId) return res.status(400).send('New img or postid not found')
-    try {
-        const UpdateTheimg = await Post.updateOne({ _id: postId }, {
-            petImg: newimg
-        })
-        if (!UpdateTheimg.modifiedCount) {
-            return res.status(400).send('img not updated :(')
-        }
-        return res.send('post\'s img updated successfully')
-    } catch (ex) {
-        return res.status(400).send(`${ex.message}`)
-    }
-})
 
 router.put('/update/addadoptrequest', authMiddleware, async (req, res) => {
     const { postId } = req.body
@@ -175,3 +167,9 @@ router.put("/update/adopte", authMiddleware, async (req , res) => {
     }
 })
 module.exports = router
+
+// { "$pull": { "arr": newelement } },
+//             { "new": true, "upsert": true },
+
+// { "$pull": { "arr": nameoftheelement } },
+//             { "new": true, "upsert": true },

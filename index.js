@@ -22,11 +22,13 @@ mongoose.connect(URI_MONGO)
 const authRoute = require('./routes/AuthRoute')
 const postRoute = require('./routes/PostRoute')
 const userRoute = require('./routes/UserRoute')
+const adminRoute = require('./routes/adminRoute')
 /** */
 /** routes */
 app.use('/api/auth', authRoute)
 app.use('/api/post', postRoute)
 app.use('/api/user', userRoute)
+app.use('/api/admin', adminRoute)
 /** */
 const PORT = process.env.PORT || 5050
 
