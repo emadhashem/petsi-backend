@@ -1,18 +1,18 @@
 const router = require('express').Router()
 const { validatePost, Post } = require('../models/PostModel')
-const {validatePost : ValidatePostAdmin, Post : PostAdmin} = require('../models/adminModel')
+const { validatePost: ValidatePostAdmin, Post: PostAdmin } = require('../models/adminModel')
 const { User } = require('../models/userModel')
 const authMiddleware = require('../middlewares/AuthMiddleWare')
 router.post('/add', authMiddleware, async (req, res) => {
 
     const postObj = req.body
     try {
-        const { error } = validatePost(postObj)
+        const { error } = ValidatePostAdmin(postObj)
         if (error) {
             return res.status(400).send(` ${error.message}`)
         }
         const owner = req.user._id
-        const newpost = {...postObj, owner}
+        const newpost = { ...postObj, owner }
         const saveNewPostAmin = await (new PostAdmin(newpost)).save()
         return saveNewPostAmin._doc
     } catch (ex) {
@@ -20,30 +20,30 @@ router.post('/add', authMiddleware, async (req, res) => {
     }
 })
 
-router.put("/update/text" ,authMiddleware, async (req, res) => {
+router.put("/update/text", authMiddleware, async (req, res) => {
 
-    const {newText, post} = req.body
+    const { newText, post } = req.body
 
-    if(!newText || !post) {
+    if (!newText || !post) {
         return res.status(400).send(`new text or post not sended`)
 
     }
     try {
-        const addToAdminForUpdate = await (new PostAdmin({...post, text : newText})).save()
+        const addToAdminForUpdate = await (new PostAdmin({ ...post, text: newText })).save()
         return res.send(addToAdminForUpdate._doc)
     } catch (ex) {
         return res.status(400).send(`some thing wrong ${ex.message}`)
     }
 })
-router.put("/update/petimg" ,authMiddleware, async (req, res) => {
+router.put("/update/petimg", authMiddleware, async (req, res) => {
 
-    const {petImg, post} = req.body
+    const { petImg, post } = req.body
 
-    if(!petImg || !post) {
+    if (!petImg || !post) {
         return res.status(400).send(`new petimg or post not sended`)
     }
     try {
-        const addToAdminForUpdate = await (new PostAdmin({...post, petImg})).save()
+        const addToAdminForUpdate = await (new PostAdmin({ ...post, petImg })).save()
         return res.send(addToAdminForUpdate._doc)
     } catch (ex) {
         return res.status(400).send(`some thing wrong ${ex.message}`)
@@ -79,18 +79,18 @@ router.put('/update/addadoptrequest', authMiddleware, async (req, res) => {
 
     try {
         const ownerOfRequst = req.user._id
-        const checkIfUserAddReq = await Post.findOne({_id : postId})
-        if(checkIfUserAddReq) {
+        const checkIfUserAddReq = await Post.findOne({ _id: postId })
+        if (checkIfUserAddReq) {
             const postreqs = checkIfUserAddReq._doc.adoptionRequests
             let cur = [...postreqs]
             let fg = false
             cur.forEach(item => {
-                if(item == ownerOfRequst) {
+                if (item == ownerOfRequst) {
                     fg = 1
                     return
                 }
             })
-            if(fg) return res.status(400).send('already u added a request')
+            if (fg) return res.status(400).send('already u added a request')
         }
         const updatePostRequests = await Post.updateOne({ _id: postId },
             { "$push": { "adoptionRequests": ownerOfRequst } },
@@ -119,18 +119,18 @@ router.put('/update/deleteadoptrequest', authMiddleware, async (req, res) => {
     if (!postId) return res.status(400).send('postid not found')
     try {
         const ownerOfRequst = req.user._id
-        const checkIfUserAddReq = await Post.findOne({_id : postId})
-        if(checkIfUserAddReq) {
+        const checkIfUserAddReq = await Post.findOne({ _id: postId })
+        if (checkIfUserAddReq) {
             const postreqs = checkIfUserAddReq._doc.adoptionRequests
             let cur = [...postreqs]
             let fg = false
             cur.forEach(item => {
-                if(item == ownerOfRequst) {
+                if (item == ownerOfRequst) {
                     fg = 1
                     return
                 }
             })
-            if(!fg) return res.status(400).send('the request not founded')
+            if (!fg) return res.status(400).send('the request not founded')
         }
         const updatePostRequests = await Post.updateOne({ _id: postId },
             { "$pull": { "adoptionRequests": ownerOfRequst } },
@@ -152,13 +152,13 @@ router.put('/update/deleteadoptrequest', authMiddleware, async (req, res) => {
     }
 
 })
-router.put("/update/adopte", authMiddleware, async (req , res) => {
-    const {adopted, postId} = req.body
-    if(!adopted || !postId) return res.status(400).send('adopt state not found :(')
+router.put("/update/adopte", authMiddleware, async (req, res) => {
+    const { adopted, postId } = req.body
+    if (!adopted || !postId) return res.status(400).send('adopt state not found :(')
 
     try {
-        const changeState = await Post.updateOne({_id : postId}, {adopted})
-        if(!changeState.modifiedCount) {
+        const changeState = await Post.updateOne({ _id: postId }, { adopted })
+        if (!changeState.modifiedCount) {
             return res.status(400).send('adoption state didnot updated:(')
         }
         return res.send('state updated')
@@ -166,6 +166,28 @@ router.put("/update/adopte", authMiddleware, async (req , res) => {
         return res.status(400).send(`${ex.message}`)
     }
 })
+
+router.post('/searchbytext', authMiddleware, async (req, res) => {
+    const { word, lstId, owner } = req.body
+    if (!word || !lstId || !owner) {
+        return res.status(400).send('word or lstid or owner is missing :(')
+    }
+    try {
+        if (lstId == 0) {
+            const postsFounded = await Post.find({ owner, _id: { '$gt': lstId } })
+                .where('text').in([`/${word}/`])
+                .limit(10)
+            return res.send(postsFounded)
+        }
+        const postsFounded = await Post.find({ owner })
+            .where('text').in([`/${word}/`])
+            .limit(10)
+        return res.send(postsFounded)
+    } catch (ex) {
+        return res.status(400).send(`${ex.message}`)
+    }
+})
+
 module.exports = router
 
 // { "$pull": { "arr": newelement } },

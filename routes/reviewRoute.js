@@ -7,7 +7,6 @@ router.post('/add', authMiddleWare, async (req, res) => {
     const {to , from, numberOfStars} = req.body
     const {error} = validateReview({to, from, numberOfStars})
     if(error) {
-
         return res.status(400).send(error.message)
     }
     try {

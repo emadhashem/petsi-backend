@@ -23,12 +23,14 @@ const authRoute = require('./routes/AuthRoute')
 const postRoute = require('./routes/PostRoute')
 const userRoute = require('./routes/UserRoute')
 const adminRoute = require('./routes/adminRoute')
+const reviewRoute = require('./routes/reviewRoute')
 /** */
 /** routes */
 app.use('/api/auth', authRoute)
 app.use('/api/post', postRoute)
 app.use('/api/user', userRoute)
 app.use('/api/admin', adminRoute)
+app.use('/api/review', reviewRoute)
 /** */
 const PORT = process.env.PORT || 5050
 
