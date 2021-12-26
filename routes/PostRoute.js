@@ -13,8 +13,9 @@ router.post('/add', authMiddleware, async (req, res) => {
         }
         const owner = req.user._id
         const newpost = { ...postObj, owner }
-        const saveNewPostAmin = await (new PostAdmin(newpost)).save()
-        return saveNewPostAmin._doc
+        const saveNewPostAmin = new PostAdmin(newpost)
+        const saved = await saveNewPostAmin.save()
+        return res.send(saved._doc)
     } catch (ex) {
         return res.status(400).send(`some thing wrong ${ex.message}`)
     }
