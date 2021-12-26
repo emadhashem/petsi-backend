@@ -18,7 +18,7 @@ router.post('/get10posts', async(req, res) => {
             const posts = await PostAdmin.find({}).limit(10);
             return res.send(posts)
         }
-        const posts = await PostAdmin.find({_id : {"$gt'" : lstPostId}}).limit(10);
+        const posts = await PostAdmin.find({_id : {'$gt' : lstPostId}}).limit(10);
         return res.send(posts)
     } catch (ex) {
         return res.status(400).send(`${ex.message}`)
