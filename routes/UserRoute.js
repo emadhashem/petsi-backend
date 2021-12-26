@@ -40,7 +40,7 @@ router.put("/update/img", authMiddleWare, async (req, res) => {
 })
 router.post('/getallposts', authMiddleWare, async (req, res) => {
     const { lstId } = req.body
-    if (!lstId) return res.status(400).send('last id of data not found')
+    if (!lstId) return res.status(400).send('last id or userid of data not found')
     try {
         if (lstId === "0") {
             const posts = await Post.find().limit(10)
@@ -52,7 +52,20 @@ router.post('/getallposts', authMiddleWare, async (req, res) => {
         return res.status(400).send(ex.message)
     }
 })
-
+router.post('/getuserposts', authMiddleWare, async (req, res) => {
+    const { lstId, userId } = req.body
+    if (!lstId || !userId) return res.status(400).send('last id or userid of data not found')
+    try {
+        if (lstId === "0") {
+            const posts = await Post.find({ owner : userId }).limit(10)
+            return res.send(posts)
+        }
+        const posts = await Post.find({ owner : userId , _id: { '$gt': lstId } }).limit(10)
+        return res.send(posts)
+    } catch (ex) {
+        return res.status(400).send(ex.message)
+    }
+})
 router.post('/searchbyname', authMiddleWare, async (req, res) => {
 
     const { word, lstId } = req.body
