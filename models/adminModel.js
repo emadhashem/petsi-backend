@@ -11,7 +11,6 @@ const postSchema = new mongoose.Schema({
     },
     adopted : {
         type : Number,
-        required : true
     },
     petImg : {
         type : String,
