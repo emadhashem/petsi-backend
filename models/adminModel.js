@@ -32,7 +32,6 @@ function validatePost(newPost) {
         petImg : Joi.string(),
         adoptionRequests : Joi.array(),
         petType : Joi.string(),
-        owner : Joi.string()
     })
     return postObj.validate(newPost)
 }

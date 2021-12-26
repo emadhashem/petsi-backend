@@ -34,7 +34,6 @@ function validatePost(newPost) {
         text : Joi.string().required().min(5),
         petImg : Joi.string(),
         adoptionRequests : Joi.array(),
-        adopted : Joi.number(),
         petType : Joi.string(),
         owner : Joi.string()
     })
