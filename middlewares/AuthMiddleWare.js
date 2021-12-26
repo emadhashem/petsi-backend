@@ -12,6 +12,6 @@ module.exports = function (req , res , next) {
         req.user = {_id :verf._id , token}
         next()
     } catch (ex) {
-        res.status(400).send('not valid token' + `${ex.message}`)
+        res.status(401).send('not valid token' + `${ex.message}`)
     }
 }
