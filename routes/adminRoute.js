@@ -2,7 +2,7 @@ const router = require('express').Router()
 const { validatePost, Post : PostAdmin } = require('../models/adminModel')
 const postHelper = require('../controllers/Posts')
 const authMiddleware = require('../middlewares/AuthMiddleWare')
-
+const {User} = require('../models/userModel')
 async function deletePostFromAdmin(postId) {
     const remove = await PostAdmin.deleteOne({_id : postId})
     return remove
@@ -24,7 +24,16 @@ router.post('/get10posts', async(req, res) => {
         return res.status(400).send(`${ex.message}`)
     }
 })
-
+router.post('/getuserdata', async (req, res) => {
+    const {userId} = req.body
+    if(!userId) return res.status(400).send('userId not found')
+    try {
+        const findUser = await User.findOne({_id : userId})
+        return res.send(findUser)
+    } catch (ex) {
+        return res.status(400).send(`${ex.message}`)
+    }
+})
 router.post('/add', async(req, res) => {
 
     const {post} = req.body
