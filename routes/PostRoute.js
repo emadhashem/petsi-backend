@@ -50,7 +50,7 @@ router.put("/update/petimg", authMiddleware, async (req, res) => {
         return res.status(400).send(`some thing wrong ${ex.message}`)
     }
 })
-router.delete('/delete', authMiddleware, async (req, res) => {
+router.post('/delete', authMiddleware, async (req, res) => {
     const { postId } = req.body
     if (!postId) return res.status(400).send(`post id missing`)
     try {
@@ -63,9 +63,9 @@ router.delete('/delete', authMiddleware, async (req, res) => {
             { "$pull": { "posts": postId } },
             { safe: true, multi: true },
         )
-        if (!deletePostFromUserArr.modifiedCount) {
-            return res.status(400).send('post not removed, user arr')
-        }
+        // if (!deletePostFromUserArr.modifiedCount) {
+        //     return res.status(400).send('post not removed, user arr')
+        // }
         return res.send('post deleted succefully')
     } catch (ex) {
         return res.status(400).send(`some thing wrong ${ex.message}`)
