@@ -189,6 +189,19 @@ router.post('/searchbytext', authMiddleware, async (req, res) => {
     }
 })
 
+router.post('/getpostdata', authMiddleware, async (req, res) => {
+    const {postId} = req.body
+    if(!postId) return res.status(400).send('post id not founded')
+
+    try {
+        const foundedPost = await Post.findOne({_id : postId})
+        return res.send(foundedPost)
+    } catch (ex) {
+        return res.status(400).send(`${ex.message}`)
+        
+    }
+})
+
 module.exports = router
 
 // { "$pull": { "arr": newelement } },
